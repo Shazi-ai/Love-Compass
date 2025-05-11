@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Compass | Modern Love Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#FF6B8B',
+                        accent: '#FFC0CB',
+                        dark: {
+                            bg: '#181818',
+                            card: '#262626',
+                            text: '#E5E5E5',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'beat': 'beat 1s ease-out infinite',
+                    },
+                    keyframes: {
+                        beat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .loading-heart {
+            animation: beat 1s infinite;
+        }
+
+        .result-circle {
+            transition: all 0.5s ease-out;
+        }
+
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .hearts-bg {
+            overflow: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.2;
+        }
+        
+        .heart {
+            position: absolute;
+            animation: float 15s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .dark .hearts-bg .heart {
+            filter: brightness(0.7);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white dark:bg-dark-bg dark:text-dark-text">
+    <!-- Background Hearts -->
+    <div class="hearts-bg" id="hearts-bg"></div>
+
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-10 bg-white dark:bg-dark-bg shadow-md dark:shadow-gray-800">
+        <div class="container mx-auto px-4 py-3">
+            <nav class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-heart text-secondary text-2xl"></i>
+                    <h1 class="text-xl font-bold text-primary dark:text-white">Love Compass</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button id="nav-home" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition font-medium">Home</button>
+                    <button id="nav-about" class="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition font-medium">About</button>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-card">
+                        <i class="fas fa-moon text-gray-600 dark:hidden"></i>
+                        <i class="fas fa-sun text-yellow-300 hidden dark:block"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Home Page -->
+    <div id="home-page" class="page active">
+        <div class="container mx-auto px-4 py-8 max-w-4xl">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-primary dark:text-white mb-3">Find Your Love Compatibility</h1>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Discover if you and your crush are meant to be together with our advanced love calculator using cosmic algorithms backed by science.</p>
+            </div>
+            
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg p-6 md:p-8 mb-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="your-name" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">Your Name</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fas fa-user text-pink-400"></i>
+                            </span>
+                            <input type="text" id="your-name" class="w-full pl-10 pr-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" placeholder="Enter your name">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="partner-name" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">Your Crush's Name</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fas fa-heart text-red-400"></i>
+                            </span>
+                            <input type="text" id="partner-name" class="w-full pl-10 pr-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" placeholder="Enter your crush's name">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="calculate-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Calculate Love Compatibility
+                </button>
+            </div>
+
+            <!-- Results Section (initially hidden) -->
+            <div id="results-container" class="hidden">
+                <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg p-6 md:p-8 text-center">
+                    <div id="loading" class="py-10 flex flex-col items-center">
+                        <i class="fas fa-heart text-5xl text-secondary loading-heart mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-300">Consulting the stars and calculating your compatibility...</p>
+                    </div>
+                    
+                    <div id="results" class="hidden">
+                        <div class="flex flex-col items-center mb-6">
+                            <div class="relative">
+                                <div id="result-circle" class="w-32 h-32 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 mb-4 transition-all duration-700 ease-out">
+                                    <span id="result-percentage" class="text-3xl font-bold text-primary">0%</span>
+                                </div>
+                                <div class="absolute -top-2 -right-2">
+                                    <i id="result-icon" class="fas fa-question-circle text-2xl text-gray-400"></i>
+                                </div>
+                            </div>
+                            <h2 id="names-display" class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">You & Your Crush</h2>
+                            <div id="result-stars" class="flex text-yellow-400 mb-4"></div>
+                        </div>
+                        
+                        <div id="result-description" class="text-gray-700 dark:text-gray-300 mb-6"></div>
+                        
+                        <div id="compatibility-traits" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- Filled by JS -->
+                        </div>
+                        
+                        <div class="flex flex-wrap justify-center gap-3 mt-6">
+                            <button id="share-result" class="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                                <i class="fas fa-share-alt mr-2"></i> Share
+                            </button>
+                            <button id="recalculate-btn" class="flex items-center bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition">
+                                <i class="fas fa-redo mr-2"></i> Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Featured Testimonials -->
+            <div class="mt-16">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Love Success Stories</h2>
+                    <p class="text-gray-600 dark:text-gray-300 max-w-xl mx-auto">See how Love Compass has helped these couples find their perfect match</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Testimonial 1 -->
+                    <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-pink-100 dark:border-pink-900/30">
+                        <!-- Testimonial Header -->
+                        <div class="bg-gradient-to-r from-pink-400 to-purple-500 p-4 relative">
+                            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 p-1 bg-white dark:bg-dark-card rounded-full border-4 border-pink-200 dark:border-pink-800">
+                                <div class="w-20 h-20 rounded-full bg-pink-100 dark:bg-pink-800 flex items-center justify-center overflow-hidden">
+                                    <i class="fas fa-heart text-pink-500 dark:text-pink-300 text-3xl animate-pulse"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="bg-white/20 dark:bg-black/20 rounded-full px-3 py-1 text-white text-sm font-bold backdrop-blur-sm">
+                                    94% Match
+                                </div>
+                                <div class="flex text-yellow-300">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial Content -->
+                        <div class="p-6 pt-12 text-center">
+                            <h3 class="font-bold text-xl text-gray-800 dark:text-white mb-1">Jessica & Mike</h3>
+                            <p class="text-sm text-primary/80 dark:text-primary/70 mb-4">San Francisco, CA</p>
+                            
+                            <div class="relative">
+                                <i class="fas fa-quote-left absolute -top-2 -left-1 text-pink-200 dark:text-pink-900 text-lg"></i>
+                                <p class="text-gray-600 dark:text-gray-300 italic">We got a 94% match and have been happily married for 2 years now! At first I didn't believe it, but this calculator predicted our compatibility better than our friends did!</p>
+                                <i class="fas fa-quote-right absolute -bottom-2 -right-1 text-pink-200 dark:text-pink-900 text-lg"></i>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-center space-x-2">
+                                <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 text-xs rounded-full">Perfect Match</span>
+                                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 text-xs rounded-full">Married</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Testimonial 2 -->
+                    <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-blue-100 dark:border-blue-900/30">
+                        <!-- Testimonial Header -->
+                        <div class="bg-gradient-to-r from-blue-400 to-sky-500 p-4 relative">
+                            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 p-1 bg-white dark:bg-dark-card rounded-full border-4 border-blue-200 dark:border-blue-800">
+                                <div class="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center overflow-hidden">
+                                    <i class="fas fa-heart-circle-check text-blue-500 dark:text-blue-300 text-3xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="bg-white/20 dark:bg-black/20 rounded-full px-3 py-1 text-white text-sm font-bold backdrop-blur-sm">
+                                    89% Match
+                                </div>
+                                <div class="flex text-yellow-300">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial Content -->
+                        <div class="p-6 pt-12 text-center">
+                            <h3 class="font-bold text-xl text-gray-800 dark:text-white mb-1">David & Sarah</h3>
+                            <p class="text-sm text-primary/80 dark:text-primary/70 mb-4">Boston, MA</p>
+                            
+                            <div class="relative">
+                                <i class="fas fa-quote-left absolute -top-2 -left-1 text-blue-200 dark:text-blue-900 text-lg"></i>
+                                <p class="text-gray-600 dark:text-gray-300 italic">I was skeptical at first, but our 89% match was spot on! Six months in and we're already talking about moving in together. The compatibility traits were so accurate!</p>
+                                <i class="fas fa-quote-right absolute -bottom-2 -right-1 text-blue-200 dark:text-blue-900 text-lg"></i>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-center space-x-2">
+                                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 text-xs rounded-full">Great Match</span>
+                                <span class="px-3 py-1 bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300 text-xs rounded-full">Dating</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Testimonial 3 -->
+                    <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-purple-100 dark:border-purple-900/30">
+                        <!-- Testimonial Header -->
+                        <div class="bg-gradient-to-r from-purple-400 to-indigo-500 p-4 relative">
+                            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 p-1 bg-white dark:bg-dark-card rounded-full border-4 border-purple-200 dark:border-purple-800">
+                                <div class="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center overflow-hidden">
+                                    <i class="fas fa-hearts text-purple-500 dark:text-purple-300 text-3xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="bg-white/20 dark:bg-black/20 rounded-full px-3 py-1 text-white text-sm font-bold backdrop-blur-sm">
+                                    78% Match
+                                </div>
+                                <div class="flex text-yellow-300">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial Content -->
+                        <div class="p-6 pt-12 text-center">
+                            <h3 class="font-bold text-xl text-gray-800 dark:text-white mb-1">Emma & Josh</h3>
+                            <p class="text-sm text-primary/80 dark:text-primary/70 mb-4">Chicago, IL</p>
+                            
+                            <div class="relative">
+                                <i class="fas fa-quote-left absolute -top-2 -left-1 text-purple-200 dark:text-purple-900 text-lg"></i>
+                                <p class="text-gray-600 dark:text-gray-300 italic">Our 78% compatibility score perfectly described our relationship. We have differences, but they make us stronger. A year together and we've never been happier!</p>
+                                <i class="fas fa-quote-right absolute -bottom-2 -right-1 text-purple-200 dark:text-purple-900 text-lg"></i>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-center space-x-2">
+                                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 text-xs rounded-full">Good Match</span>
+                                <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 text-xs rounded-full">1 Year</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Page -->
+    <div id="about-page" class="page">
+        <div class="container mx-auto px-4 py-8 max-w-4xl">
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg p-6 md:p-8 mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-primary dark:text-white mb-6">About Love Compass</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-white">How It Works</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Our advanced love calculator uses a combination of numerology, letter analysis, and cosmic compatibility to determine how well you and your potential partner match. While just for fun, our algorithm considers:</p>
+                        <ul class="list-disc pl-6 mt-3 text-gray-600 dark:text-gray-300">
+                            <li>Name length and syllable harmony</li>
+                            <li>Letter frequency and compatibility</li>
+                            <li>Numerical values associated with names</li>
+                            <li>Cosmic alignment based on name vibrations</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-white">The Science Behind It</h3>
+                        <p class="text-gray-600 dark:text-gray-300">While our calculator is primarily for entertainment, it draws inspiration from the centuries-old practices of numerology and name analysis. We've blended these traditions with a modern algorithm that analyzes the harmony between two names.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-white">For Entertainment Only</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Please remember that Love Compass is designed for entertainment purposes. Real relationships are complex and depend on many factors beyond name compatibility. Use our calculator for fun, but build your relationships on communication, shared values, and genuine connection.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800 dark:text-white">Frequently Asked Questions</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-gray-800 dark:text-white">Is the calculator accurate?</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Our calculator is for entertainment purposes only and should not be taken as a scientific assessment of relationship potential.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-800 dark:text-white">Should I make relationship decisions based on the results?</h4>
+                                <p class="text-gray-600 dark:text-gray-300">No. Real relationships depend on communication, shared values, and experiences together - not a name compatibility calculator.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-800 dark:text-white">Does the order of names matter?</h4>
+                                <p class="text-gray-600 dark:text-gray-300">For the most accurate results, enter your name first and your crush's name second, but the difference is usually minimal.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-800 dark:text-white">Should I use nicknames or full names?</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use the names you both go by in everyday life for the most meaningful results.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="about-to-home" class="mt-8 bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Try the Love Calculator
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 dark:bg-dark-card py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center justify-center md:justify-start space-x-2">
+                        <i class="fas fa-heart text-secondary"></i>
+                        <span class="text-primary dark:text-white font-semibold">Love Compass</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 text-center md:text-left">For entertainment purposes only</p>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400">© 2023 Love Compass. All rights reserved.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Privacy Policy | Terms of Use</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Handle dark mode toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+        
+        // Listen for system dark mode changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        // Page navigation
+        const pages = {
+            home: document.getElementById('home-page'),
+            about: document.getElementById('about-page')
+        };
+        
+        function navigateTo(page) {
+            Object.values(pages).forEach(p => p.classList.remove('active'));
+            pages[page].classList.add('active');
+            window.scrollTo(0, 0);
+        }
+        
+        document.getElementById('nav-home').addEventListener('click', () => navigateTo('home'));
+        document.getElementById('nav-about').addEventListener('click', () => navigateTo('about'));
+        document.getElementById('about-to-home').addEventListener('click', () => navigateTo('home'));
+        
+        // Create floating hearts background
+        function createHeartsBg() {
+            const heartsContainer = document.getElementById('hearts-bg');
+            const colors = ['#FF6B8B', '#FF8E9E', '#FFC0CB', '#5D5CDE', '#7B7BFF'];
+            const heartCount = 15;
+            
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '<i class="fas fa-heart"></i>';
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.fontSize = `${Math.random() * 20 + 10}px`;
+                heart.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                heart.style.animationDelay = `${Math.random() * 5}s`;
+                heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+                heartsContainer.appendChild(heart);
+            }
+        }
+        
+        createHeartsBg();
+        
+        // Love Calculator Logic
+        const calculateBtn = document.getElementById('calculate-btn');
+        const recalculateBtn = document.getElementById('recalculate-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const loadingSection = document.getElementById('loading');
+        const resultsSection = document.getElementById('results');
+        const shareBtn = document.getElementById('share-result');
+        
+        // Compatibility calculation based on names
+        function calculateCompatibility(name1, name2) {
+            if (!name1 || !name2) return 0;
+            
+            // Convert to lowercase and remove spaces
+            name1 = name1.toLowerCase().replace(/\s+/g, '');
+            name2 = name2.toLowerCase().replace(/\s+/g, '');
+            
+            // Basic algorithm combining multiple factors for fun
+            
+            // Factor 1: Similar letters (30%)
+            let commonLetters = 0;
+            const uniqueLetters1 = [...new Set(name1)];
+            const uniqueLetters2 = [...new Set(name2)];
+            
+            uniqueLetters1.forEach(letter => {
+                if (uniqueLetters2.includes(letter)) commonLetters++;
+            });
+            
+            const letterSimilarity = Math.min(commonLetters / Math.max(uniqueLetters1.length, uniqueLetters2.length), 1) * 30;
+            
+            // Factor 2: Length similarity (20%)
+            const lengthDiff = Math.abs(name1.length - name2.length);
+            const lengthSimilarity = Math.max(0, 20 - lengthDiff * 2);
+            
+            // Factor 3: Name energy (50%)
+            let nameSum = 0;
+            for (let i = 0; i < name1.length; i++) {
+                nameSum += name1.charCodeAt(i);
+            }
+            for (let i = 0; i < name2.length; i++) {
+                nameSum += name2.charCodeAt(i);
+            }
+            
+            // Create a repeatable but seemingly random distribution
+            const nameEnergy = (nameSum % 50) + 1;
+            
+            // Combine factors and add a small random factor
+            const baseScore = letterSimilarity + lengthSimilarity + nameEnergy;
+            const randomAdjustment = Math.random() * 10 - 5; // -5 to +5
+            
+            // Final score
+            let finalScore = Math.round(baseScore + randomAdjustment);
+            finalScore = Math.max(0, Math.min(100, finalScore));
+            
+            return finalScore;
+        }
+        
+        // Get compatibility description based on score
+        function getCompatibilityDescription(score) {
+            if (score >= 90) {
+                return "Perfect Match! You two have an extraordinary connection that's rare to find. Your energies complement each other perfectly, creating a harmonious and deeply fulfilling relationship potential.";
+            } else if (score >= 80) {
+                return "Excellent Compatibility! There's a strong natural attraction between you. Your relationship has great potential for long-term happiness and mutual understanding.";
+            } else if (score >= 70) {
+                return "Great Match! You share a meaningful connection with plenty of chemistry. With some effort, your relationship can flourish and grow stronger over time.";
+            } else if (score >= 60) {
+                return "Good Compatibility! You have a positive connection with decent relationship potential. Working on communication will help strengthen your bond.";
+            } else if (score >= 50) {
+                return "Average Match. There's potential here, but you'll need to work on understanding each other better. Your differences could either complement or challenge your relationship.";
+            } else if (score >= 40) {
+                return "Fair Compatibility. You may face some challenges in this relationship, but if you're willing to compromise and communicate, it could work out.";
+            } else if (score >= 30) {
+                return "Challenging Match. Your compatibility is on the lower side, suggesting different approaches to life. If committed, you'll need patience and understanding.";
+            } else if (score >= 20) {
+                return "Difficult Compatibility. This relationship may require significant effort. Consider if you're willing to work through the substantial differences.";
+            } else {
+                return "Low Compatibility. The stars suggest you might be better as friends. Your energies appear to move in different directions.";
+            }
+        }
+        
+        // Get compatibility traits based on score
+        function getCompatibilityTraits(score) {
+            const traits = [
+                {
+                    title: "Communication",
+                    icon: "fa-comments",
+                    value: Math.min(100, score + Math.floor(Math.random() * 15 - 5))
+                },
+                {
+                    title: "Romance",
+                    icon: "fa-heart",
+                    value: Math.min(100, score + Math.floor(Math.random() * 20 - 10))
+                },
+                {
+                    title: "Trust",
+                    icon: "fa-shield-alt",
+                    value: Math.min(100, score + Math.floor(Math.random() * 15))
+                }
+            ];
+            
+            return traits;
+        }
+        
+        // Get result icon based on score
+        function getResultIcon(score) {
+            if (score >= 80) return '<i class="fas fa-heart text-red-500"></i>';
+            if (score >= 60) return '<i class="fas fa-heart-half-stroke text-pink-500"></i>';
+            if (score >= 40) return '<i class="fas fa-star text-yellow-500"></i>';
+            return '<i class="fas fa-xmark text-gray-500"></i>';
+        }
+        
+        // Start calculation process
+        function startCalculation() {
+            const yourName = document.getElementById('your-name').value.trim();
+            const partnerName = document.getElementById('partner-name').value.trim();
+            
+            if (!yourName || !partnerName) {
+                alert("Please enter both names to calculate compatibility.");
+                return;
+            }
+            
+            // Show the results container and loading animation
+            resultsContainer.classList.remove('hidden');
+            loadingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            
+            // Scroll to results container
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            // Simulate calculation time
+            setTimeout(() => {
+                const compatibilityScore = calculateCompatibility(yourName, partnerName);
+                displayResults(yourName, partnerName, compatibilityScore);
+            }, 2000);
+        }
+        
+        // Display the calculation results
+        function displayResults(name1, name2, score) {
+            // Hide loading, show results
+            loadingSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            
+            // Update UI elements
+            document.getElementById('names-display').textContent = `${name1} & ${name2}`;
+            
+            // Animate percentage
+            const resultPercentage = document.getElementById('result-percentage');
+            const resultCircle = document.getElementById('result-circle');
+            
+            // Reset before animation
+            resultPercentage.textContent = '0%';
+            resultCircle.style.background = `conic-gradient(#5D5CDE 0%, #f3f4f6 0%)`;
+            
+            // Start animation
+            let currentPercent = 0;
+            const interval = setInterval(() => {
+                currentPercent += 1;
+                resultPercentage.textContent = `${currentPercent}%`;
+                
+                // Update circle gradient
+                resultCircle.style.background = `conic-gradient(#5D5CDE ${currentPercent * 3.6}deg, ${currentPercent < 50 ? '#f3f4f6' : '#e5e7eb'} 0deg)`;
+                
+                if (currentPercent >= score) {
+                    clearInterval(interval);
+                    
+                    // Set color based on score
+                    let color = 'blue-400';
+                    if (score >= 80) color = 'pink-500';
+                    else if (score >= 60) color = 'purple-500';
+                    else if (score >= 40) color = 'yellow-500';
+                    
+                    resultCircle.style.boxShadow = `0 0 20px var(--tw-ring-color)`;
+                    resultCircle.style.setProperty('--tw-ring-color', `rgb(var(--${color}))}`);
+                    
+                    // Update result icon
+                    document.getElementById('result-icon').outerHTML = getResultIcon(score);
+                }
+            }, 20);
+            
+            // Set description
+            document.getElementById('result-description').textContent = getCompatibilityDescription(score);
+            
+            // Set stars
+            const starsContainer = document.getElementById('result-stars');
+            starsContainer.innerHTML = '';
+            const starCount = Math.ceil(score / 20); // 1-5 stars
+            
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('i');
+                if (i < starCount) {
+                    star.className = 'fas fa-star';
+                } else {
+                    star.className = 'far fa-star';
+                }
+                star.classList.add('mx-1');
+                starsContainer.appendChild(star);
+            }
+            
+            // Set compatibility traits
+            const traitsContainer = document.getElementById('compatibility-traits');
+            traitsContainer.innerHTML = '';
+            
+            getCompatibilityTraits(score).forEach(trait => {
+                const traitEl = document.createElement('div');
+                traitEl.className = 'bg-gray-50 dark:bg-gray-800 rounded-lg p-4';
+                traitEl.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas ${trait.icon} text-primary mr-2"></i>
+                            <span class="font-medium text-gray-800 dark:text-white">${trait.title}</span>
+                        </div>
+                        <span class="text-sm font-semibold">${trait.value}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-primary h-2.5 rounded-full" style="width: ${trait.value}%"></div>
+                    </div>
+                `;
+                traitsContainer.appendChild(traitEl);
+            });
+        }
+        
+        // Setup event listeners
+        calculateBtn.addEventListener('click', startCalculation);
+        recalculateBtn.addEventListener('click', () => {
+            resultsContainer.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Share functionality
+        shareBtn.addEventListener('click', () => {
+            const yourName = document.getElementById('your-name').value;
+            const partnerName = document.getElementById('partner-name').value;
+            const score = document.getElementById('result-percentage').textContent;
+            
+            const text = `I just calculated my love compatibility with ${partnerName} and got ${score}! Try the Love Compass calculator yourself!`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Love Compass Results',
+                    text: text
+                }).catch(err => {
+                    console.error('Error sharing:', err);
+                });
+            } else {
+                // Fallback for browsers that don't support the Web Share API
+                // We could copy to clipboard as a fallback
+                try {
+                    navigator.clipboard.writeText(text);
+                    alert('Result copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
